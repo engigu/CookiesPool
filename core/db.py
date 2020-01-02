@@ -55,15 +55,27 @@ class CookiesPoolRedis(Redis):
     #
     #
 
-    store_key = Config.PROJECT_NAME
     cookies_key_format = Config.COOKIES_KEY_FORMAT
 
     def query_all_cookies_keys(self):
         # 获取所有存储的cookies key
-        for key in self.redis_client.hkeys(
-                self.store_key
-        ):
-            yield key
+        return self.redis_client.keys('*:%s:*' % self.cookies_key_format.split(':')[1])
+
+        # return self.redis_client.hkeys(self.store_key)
 
     def query_store_cookies(self, key):
         return self.redis_client.hget(self.store_key, key)
+
+    def _add_one_cookies(self, key, value):
+        return self.redis_client.hset(self.store_key, key, value)
+
+    def add_one_cookies(self, key, value):
+        # print(self.redis_client.keys('58:*:0'))
+        site = '58'
+        cookies_key = self.cookies_key_format % dict(site=site, no=0)
+        c_len = self.redis_client.keys(
+            '%s:%s:*' % (site, self.cookies_key_format.split(':')[1])
+        )
+        
+        print(c_len, self.redis_client.keys('*'))
+        # return self.redis_client.set(cookies_key, '6666')
