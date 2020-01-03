@@ -45,37 +45,49 @@ class Redis(metaclass=SameOriginSingleton):
 
 
 class CookiesPoolRedis(Redis):
-    #   hash
-    #     key:         value:
-    #               --- {cookies_0:
-    # cookies_pool |-- cookies_1
-    #               --- cookies_0
-    #
-    #
-    #
-    #
+    # store format string
 
     cookies_key_format = Config.COOKIES_KEY_FORMAT
 
     def query_all_cookies_keys(self):
         # 获取所有存储的cookies key
-        return self.redis_client.keys('*:%s:*' % self.cookies_key_format.split(':')[1])
+        all_keys = self.redis_client.keys('*:%s:*' % self.cookies_key_format.split(':')[1])
+        for key in all_keys:
+            if isinstance(key, bytes):
+                key = key.decode()
+            yield key
 
-        # return self.redis_client.hkeys(self.store_key)
+    def add_one_cookies(self, site: str, value: str) -> str:
+        #  key样式  ['58:cookies:0']
+        # site = '58'
+        no = self.calc_missing_no(site)
+        cookies_key = self.cookies_key_format % dict(site=site, no=no)
+        return self.redis_client.set(cookies_key, value)
 
-    def query_store_cookies(self, key):
-        return self.redis_client.hget(self.store_key, key)
+    def calc_missing_no(self, site):
+        # 计算出缺失的序号
+        all_key = self.redis_client.keys('%s:%s:*' % (site, self.cookies_key_format.split(':')[1]))
+        all_key = [i.decode() if isinstance(i, bytes) else i for i in all_key]
+        all_no = [int(x.split(':')[-1]) for x in all_key]
+        all_no_sort = sorted(all_no, key=lambda x: x)
 
-    def _add_one_cookies(self, key, value):
-        return self.redis_client.hset(self.store_key, key, value)
+        if not all_no:
+            return 0
 
-    def add_one_cookies(self, key, value):
-        # print(self.redis_client.keys('58:*:0'))
-        site = '58'
-        cookies_key = self.cookies_key_format % dict(site=site, no=0)
-        c_len = self.redis_client.keys(
-            '%s:%s:*' % (site, self.cookies_key_format.split(':')[1])
-        )
-        
-        print(c_len, self.redis_client.keys('*'))
-        # return self.redis_client.set(cookies_key, '6666')
+        last_no = all_no_sort[-1] if bool(all_no_sort) else 0
+        missing_set = set(range(last_no)) - set(all_no)
+
+        if not missing_set:
+            # 沒有缺失的序号，序号直接加1
+            return last_no + 1
+        # 直接返回缺失的第一个序号
+        return list(sorted(missing_set))[0]
+
+    def delete_one_cookies(self, key):
+        return self.redis_client.delete(key)
+
+    def update_one_cookies(self, key, value):
+        return self.redis_client.set(key, value)
+
+    def get_one_cookies(self, key):
+        return self.redis_client.get(key).decode() if key else ''

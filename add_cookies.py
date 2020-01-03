@@ -1,5 +1,8 @@
+import json
+
 from config import Config
 from core.db import CookiesPoolRedis
+from core.utils import Utils
 
 
 class AddCookies:
@@ -11,27 +14,24 @@ class AddCookies:
     def add_to_redis(self, to_add_cookies: list):
         site = '58'
 
-        same_site_cookies = [
-            i for i in self.redis.query_all_cookies_keys()
-            if i.startswith(site)
-        ]
+        for i in to_add_cookies:
+            now = Utils.now()
+            cookies_dict = {
+                'cookies': i,
+                'check_url': 'https://employer.58.com/resumesearch?PGTID=0d000000-0000-02bf-9f94-8c7003dc986f&ClickID=29',
+                'check_key': '<title>用户登录-58同城</title>',
+                'modified_at': now,
+                'created_at': now,
+                'status': 0
 
-        same_site_cookies_num = len(same_site_cookies)
-
-        for index, c in enumerate(to_add_cookies):
-            no = same_site_cookies_num + index
-
-
-        key = Config.COOKIES_KEY_FORMAT % dict(
-            site=site, no=0
-        )
-
-        self.redis.add_one_cookies()
-
+            }
+            self.redis.add_one_cookies(site, json.dumps(cookies_dict, ensure_ascii=False))
 
     def test(self):
-        self.redis.add_one_cookies('58:cookies:0', '555')
+        # for i in range(1000):
+        self.redis.add_one_cookies('58', '888')
         # self.redis.query_all_cookies_keys()
+
 
 if __name__ == '__main__':
     to_add_cookies = [
@@ -39,5 +39,5 @@ if __name__ == '__main__':
     ]
 
     ac = AddCookies(redis_uri=Config.REDIS_URI)
-    # ac.add_to_redis(to_add_cookies)
-    ac.test()
+    ac.add_to_redis(to_add_cookies)
+    # ac.test()

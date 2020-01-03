@@ -13,9 +13,21 @@ class RedisPool:
     def __init__(self, redis_uri):
         self.redis = CookiesPoolRedis(uri=redis_uri)
 
+    def do_check(self, cookies_dict):
+
+        return True
+
+    def deal_check_result(self, key, check_result):
+        return
+
     def _run_(self):
         for key in self.redis.query_all_cookies_keys():
             print('keys:', key)
+            cookies_dict = self.redis.get_one_cookies(key)
+            print('cookies_dict:', cookies_dict)
+
+            check_result = self.do_check(cookies_dict)
+            self.deal_check_result(key=key, check_result=check_result)
 
     def run(self):
         while True:
