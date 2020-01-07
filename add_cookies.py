@@ -20,6 +20,8 @@ class AddCookies:
                 'cookies': i,
                 'check_url': 'https://employer.58.com/resumesearch?PGTID=0d000000-0000-02bf-9f94-8c7003dc986f&ClickID=29',
                 'check_key': '<title>用户登录-58同城</title>',
+                'method': 'get',
+                'headers': {},
                 'modified_at': now,
                 'created_at': now,
                 'status': 0

@@ -71,7 +71,7 @@ class CookiesPoolRedis(Redis):
         all_no = [int(x.split(':')[-1]) for x in all_key]
         all_no_sort = sorted(all_no, key=lambda x: x)
 
-        if not all_no:
+        if not bool(all_no):
             return 0
 
         last_no = all_no_sort[-1] if bool(all_no_sort) else 0
