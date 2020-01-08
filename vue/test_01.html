@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<body>
+
+    <div id="site">
+
+        <table>
+            <tr>
+                <td v-for="col in col_list">{{ col }}</td>
+            </tr>
+
+            <tr v-for="item in list_data">
+                <td> {{ item.no }} </td>
+                <td> {{ item.cookies }} </td>
+                <td v-text="item.status?'可用':'不可用'"></td>
+            </tr>
+
+        </table>
+
+    </div>
+
+
+
+    <script>
+        // axios.get('http://httpbin.org/get').then(function (res) {
+        //     console.log(res)
+        // })
+
+        var vue = new Vue({
+            el: "#site",
+            data: {
+                "col_list": ["No", "Cookies", "Status"],
+                "list_data": [{ "no": 1, "cookies": 666, "status": 0 }, { "no": 2, "cookies": 9999, "status": 1 }]
+            }
+        })
+
+    </script>
+
+</body>
+
+</html>
