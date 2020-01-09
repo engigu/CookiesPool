@@ -58,7 +58,7 @@ def cookies_get():
 def cookies_post():
     site = request.form.get('site', None)
     cookies = request.form.get('cookies', None)
-    if not any([site,  cookies]):
+    if not all([site,  cookies]):
         return error(msg='site or cookies is empty!')
     REDIS_MODEL.add_one_cookies(site=site,  value=cookies)
     return ok()
@@ -69,7 +69,7 @@ def cookies_post():
 def cookies_put():
     key = request.form.get('key', None)
     cookies = request.form.get('cookies', None)
-    if not any([key,  cookies]):
+    if not all([key,  cookies]):
         return error(msg='key or cookies is empty!')
     REDIS_MODEL.update_one_cookies(key=key,  value=cookies)
     return ok()
@@ -87,7 +87,7 @@ def cookies_delete():
 
 def run():
     app.config['JSON_AS_ASCII'] = False
-    app.run(debug=True, host='0.0.0.0', port=9632)
+    app.run(debug=True, host='0.0.0.0', port=Config.API_SERVER_PORT)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  cookies-pool-server:
+    image: "cookies-pool-server"
+    environment: 
+      - RUN_IN_DOCKER=yes
+    ports:
+      - "9632:9632"
+    links:
+      - redis
+
+  redis:
+    image: "redis"
+    ports:
+      - "6379:6379"
+    volumes: 
+      - /data/docker/cookies_pool:/data
