@@ -1,0 +1,45 @@
+version: "3.7"
+services:
+  cookies-pool-server:
+    build: 
+      context: ./
+      dockerfile: ./docker/server.dockerfile
+    image: "cookies-pool-server"
+    environment: 
+      - RUN_IN_DOCKER=yes
+    volumes: 
+      - cp_static:/code/vue
+    ports:
+      - "9632:9632"
+    links:
+      - redis
+    networks: 
+      - cp_net
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:9632"
+    volumes: 
+      - /data/cookies_pool:/data
+    networks: 
+      - cp_net
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "9600:80"
+    depends_on:
+      -  cookies-pool-server
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./vue:/usr/share/nginx/html/
+    networks: 
+      - cp_net
+
+networks: 
+  cp_net:
+
+volumes:
+  cp_static:

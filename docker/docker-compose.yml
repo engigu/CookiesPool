@@ -10,8 +10,9 @@ services:
       - redis
 
   redis:
-    image: "redis"
+    image: redis:alpine
+    restart: always
     ports:
-      - "6379:6379"
+      - "6379:9632"
     volumes: 
-      - /data/docker/cookies_pool:/data
+      - /data/cookies_pool:/data
