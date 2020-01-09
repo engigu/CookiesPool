@@ -8,6 +8,7 @@ class Config:
 
     ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-    REDIS_URI = 'redis://192.168.244.128:6379/2'
+    # REDIS_URI = 'redis://192.168.244.128:6379/2'
+    REDIS_URI = 'redis://127.0.0.1:6352/2'
 
     SLEEP_LOOP_TIME = 5 * 60

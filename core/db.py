@@ -90,4 +90,5 @@ class CookiesPoolRedis(Redis):
         return self.redis_client.set(key, value)
 
     def get_one_cookies(self, key):
-        return self.redis_client.get(key).decode() if key else ''
+        cookies = self.redis_client.get(key) 
+        return cookies.decode() if cookies else ''
