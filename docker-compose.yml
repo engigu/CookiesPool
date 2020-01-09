@@ -15,8 +15,6 @@ services:
   redis:
     image: redis:alpine
     restart: always
-    ports:
-      - "6379:9632"
     volumes: 
       - /data/cookies_pool:/data
     networks: 
