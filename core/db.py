@@ -1,5 +1,6 @@
 import base64
 import redis
+import json
 
 from config import Config
 
@@ -17,7 +18,8 @@ class SameOriginSingleton(type):
     def __call__(cls, *args, **kwargs):
         params_ident = cls.calc_params_identify(args)
         if params_ident not in cls._instances:
-            cls._instances[params_ident] = super(SameOriginSingleton, cls).__call__(*args, **kwargs)
+            cls._instances[params_ident] = super(
+                SameOriginSingleton, cls).__call__(*args, **kwargs)
         return cls._instances[params_ident]
 
 
@@ -51,7 +53,8 @@ class CookiesPoolRedis(Redis):
 
     def query_all_cookies_keys(self):
         # 获取所有存储的cookies key
-        all_keys = self.redis_client.keys('*:%s:*' % self.cookies_key_format.split(':')[1])
+        all_keys = self.redis_client.keys(
+            '*:%s:*' % self.cookies_key_format.split(':')[1])
         for key in all_keys:
             if isinstance(key, bytes):
                 key = key.decode()
@@ -64,9 +67,14 @@ class CookiesPoolRedis(Redis):
         cookies_key = self.cookies_key_format % dict(site=site, no=no)
         return self.redis_client.set(cookies_key, value)
 
+    def get_sorted_list(self,  raw_list):
+        all_key = [i.decode() if isinstance(i, bytes) else i for i in raw_list]
+        return sorted(all_key, key=lambda x: x.split(":")[-1])
+
     def calc_missing_no(self, site):
         # 计算出缺失的序号
-        all_key = self.redis_client.keys('%s:%s:*' % (site, self.cookies_key_format.split(':')[1]))
+        all_key = self.redis_client.keys(
+            '%s:%s:*' % (site, self.cookies_key_format.split(':')[1]))
         all_key = [i.decode() if isinstance(i, bytes) else i for i in all_key]
         all_no = [int(x.split(':')[-1]) for x in all_key]
         all_no_sort = sorted(all_no, key=lambda x: x)
@@ -90,5 +98,18 @@ class CookiesPoolRedis(Redis):
         return self.redis_client.set(key, value)
 
     def get_one_cookies(self, key):
-        cookies = self.redis_client.get(key) 
-        return cookies.decode() if cookies else ''
+        cookies = self.redis_client.get(key)
+        return json.loads(cookies.decode()) if cookies else {}
+
+    def query_all_cookies(self, page=1, size=20):
+        # 获取所有存储的cookies key
+        page =  page if page else 1
+        size =  size if size else 20
+        all_keys = self.redis_client.keys( '*:%s:*' % self.cookies_key_format.split(':')[1])
+        all_keys = self.get_sorted_list(all_keys)
+        to_query = all_keys[(page-1)*size:page*size]
+
+        return [
+            dict({'key': k}, **self.get_one_cookies(key=k))
+            for k in to_query
+        ], len(all_keys)

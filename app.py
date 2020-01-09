@@ -33,11 +33,13 @@ def index():
 
 
 # 查询所有的keys
-@app.route('/cookies_keys', methods=['GET'])
+@app.route('/cookies_all', methods=['GET'])
 # @auth.login_required
-def cookies_keys():
-    keys = REDIS_MODEL.query_all_cookies_keys()
-    return jsonify([k for k in keys])
+def cookies_all():
+    page = request.args.get('page')
+    size = request.args.get('size')
+    cookies, total = REDIS_MODEL.query_all_cookies(page=page, size=size)
+    return jsonify({"total": total, "cookies":  cookies})
 
 
 # 查询指定的cookies

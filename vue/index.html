@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Cookies Page</title>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -19,9 +19,12 @@
             </tr>
 
             <tr v-for="item in list_data">
-                <td> {{ item.no }} </td>
+                <td> {{ item.key }} </td>
                 <td> {{ item.cookies }} </td>
+                <td> {{ item.modified_at }} </td>
                 <td v-text="item.status?'可用':'不可用'"></td>
+                <td :key="item.no">修改</td>
+                <td :key="item.no">删除</td>
             </tr>
 
         </table>

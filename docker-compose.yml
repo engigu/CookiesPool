@@ -7,10 +7,6 @@ services:
     image: "cookies-pool-server"
     environment: 
       - RUN_IN_DOCKER=yes
-    volumes: 
-      - cp_static:/code/vue
-    ports:
-      - "9632:9632"
     links:
       - redis
     networks: 
@@ -40,6 +36,3 @@ services:
 
 networks: 
   cp_net:
-
-volumes:
-  cp_static:
