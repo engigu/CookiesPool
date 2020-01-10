@@ -1,12 +1,13 @@
-import time
+import time, datetime
 import os
 
 class Utils:
 
     @staticmethod
-    def now():
-        return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-
+    def now(return_datetime=False):
+        if not datetime:
+            return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        return datetime.datetime.now()
 
     @staticmethod
     def run_in_docker():
