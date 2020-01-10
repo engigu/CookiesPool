@@ -1,8 +1,4 @@
 
-
-
-
-
 var vue = new Vue({
     el: "#site",
     data () {
