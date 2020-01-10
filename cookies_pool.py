@@ -7,6 +7,7 @@ from core.db import CookiesPoolRedis
 from checker import Checker
 from config import Config
 from core.utils import Utils
+from core.status import  TaskStatus
 
 tornado.log.enable_pretty_logging()
 
@@ -28,9 +29,13 @@ class RedisPool:
         ckr = Checker()
         return ckr.do_check(**params)
 
-    def deal_check_result(self, key, check_result):
+    def deal_check_result(self, key,cookies_dict, check_result):
         print('key, check_result::::', key, check_result)
-        Utils.now()
+        if not  check_result:
+            logging.info(f"key: {key} has expired")
+            cookies_dict['modified_at']  =  Utils.now
+            cookies_dict['status']  =  TaskStatus.failed
+            self.redis.update_one_cookies(key, json.dumps(cookies_dict, ensure_ascii=False))
         return
 
     def do_a_circle(self):
@@ -38,16 +43,22 @@ class RedisPool:
             print('keys:', key)
             # setattr(self, key, False)
             cookies_dict = self.redis.get_one_cookies(key)
-            cookies_dict = json.loads(cookies_dict)
             print('cookies_dict:', cookies_dict)
 
-            check_result = self.do_check(cookies_dict)
-            self.deal_check_result(key=key, check_result=check_result)
-            # delattr(self, key)
+            try:
+                check_result = self.do_check(cookies_dict)
+                self.deal_check_result(key=key, cookies_dict=cookies_dict,check_result=check_result)
+            except Exception as e:
+                logging.exception("check error When %s" % key, e)
 
     def run(self):
         while True:
-            self.do_a_circle()
+            try:
+                self.do_a_circle()
+            except KeyboardInterrupt:
+                logging.info("KeyboardInterrupt, exiting....")
+            except Exception as e:
+                logging.exception(e)
             logging.info(f'main loop sleep {Config.SLEEP_LOOP_TIME}s')
             break
             time.sleep(Config.SLEEP_LOOP_TIME)
