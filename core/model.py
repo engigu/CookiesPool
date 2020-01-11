@@ -1,3 +1,4 @@
+from config import Config
 import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -9,9 +10,14 @@ import sys
 import os
 
 sys.path.insert(0, os.path.abspath('../'))
-from config import Config
 
 Base = declarative_base()
+
+
+def init_sqlite():
+    path = Config.SQLITE_URI.split('sqlite:///')[-1]
+    if os.path.exists(path):
+        Base.metadata.create_all(engine)
 
 
 #   {'cookies': '111111',
@@ -22,7 +28,7 @@ Base = declarative_base()
 
 class Site(Base):
     __tablename__ = "site"
-    id = Column(Integer, primary_key=True, autoincrement=True)  
+    id = Column(Integer, primary_key=True, autoincrement=True)
     site = Column(String(64), server_default=text("''"))
     headers = Column(String(4096), server_default=text("''"))
     check_key = Column(String(2048), server_default=text("''"))
@@ -33,9 +39,10 @@ class Site(Base):
     created = Column(TIMESTAMP,  server_default=text("CURRENT_TIMESTAMP"))
     modified = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))
 
+
 class StoreCookies(Base):
     __tablename__ = "cookies"
-    id = Column(Integer, primary_key=True, autoincrement=True) 
+    id = Column(Integer, primary_key=True, autoincrement=True)
     site_id = Column(Integer, nullable=False)
     cookies_name = Column(String(256), server_default=text("''"))
     cookies = Column(String(64), server_default=text("''"))
@@ -45,7 +52,7 @@ class StoreCookies(Base):
     modified = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))
 
 
-engine = create_engine(Config.SQLITE_URI, echo=True)
+engine = create_engine(Config.SQLITE_URI, echo=False)
 session = sessionmaker(bind=engine)
 SessionType = scoped_session(sessionmaker(bind=engine, expire_on_commit=False))
 

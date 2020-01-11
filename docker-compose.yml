@@ -7,18 +7,18 @@ services:
     image: "cookies-pool-server"
     environment: 
       - RUN_IN_DOCKER=yes
-    links:
-      - redis
+    volumes: 
+      - /data/docker/cookies_pools/data:/code/data
     networks: 
       - cp_net
 
-  redis:
-    image: redis:alpine
-    restart: always
-    volumes: 
-      - /data/cookies_pool:/data
-    networks: 
-      - cp_net
+  # redis:
+  #   image: redis:alpine
+  #   restart: always
+  #   volumes: 
+  #     - /data/cookies_pool:/data
+  #   networks: 
+  #     - cp_net
 
   nginx:
     image: nginx:stable-alpine
@@ -34,3 +34,6 @@ services:
 
 networks: 
   cp_net:
+
+volumes: 
+  cp_sqlite_db: 

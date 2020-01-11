@@ -11,18 +11,23 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
 <body>
+    <div id="site_block">
+        <div v-for='site in sites' @click="alert('a')">{{ site }} </div>
+    </div>
+
     <div id="site">
 
-        <table>
+
+        <table v-show="false">
             <tr>
                 <td v-for="col in col_list">{{ col }}</td>
             </tr>
 
             <tr v-for="item in list_data">
-                <td> {{ item.key }} </td>
+                <td> {{ item.cookies_name }} </td>
                 <td> {{ item.cookies }} </td>
-                <td> {{ item.modified_at }} </td>
-                <td v-text="item.status?'可用':'不可用'"></td>
+                <td> {{ item.modified }} </td>
+                <td v-text="item.status?'不可用':'可用'"></td>
                 <td :key="item.no">修改</td>
                 <td :key="item.no">删除</td>
             </tr>
@@ -32,4 +37,5 @@
     </div>
 </body>
 <script src="./static/main.js"></script>
+
 </html>
