@@ -1,38 +1,75 @@
 
-var site = new Vue({
-    el: "#site",
-    data () {
+
+Vue.component("listpage", {
+    template: `
+    <table v-show="isShow">
+    listpage
+    {{ query_site }}
+    {{ get_cookies }}  <!-- 更改数据 -->
+    {{ total }}
+    <tr>
+        <td v-for="col in col_list">{{ col }}</td>
+    </tr>
+
+    <tr v-for="item in list_data">
+        <td> {{ item.cookies_name }} </td>
+        <td> {{ item.cookies }} </td>
+        <td> {{ item.modified }} </td>
+        <td v-text="item.status?'不可用':'可用'"></td>
+        <td :key="item.no">修改</td>
+        <td :key="item.no">删除</td>
+    </tr>
+
+</table>`,
+    data() {
         return {
-            "col_list": ["No", "Cookies", "ModifiedAt","Status"],
             "list_data": "",
-            "total": ""
+            "col_list": ["Name", "Cookie", "ModifiedAt", "Status"],
+            "total": "",
         }
     },
-    // mounted () {
-    //     axios.get('/cookies_all?site=58').then(response => (
-    //         this.list_data = response.data.cookies,
-    //         this.total = response.data.total
-    //         )).catch(function (err) {
-    //         console.log(err)
-    //     })
-    // }
+    props: ["query_site"],
+    computed: {
+        get_cookies() {
+            if (this.query_site != '') {
+                axios.get('/cookies_all?site=' + this.query_site).then(response => (
+                    this.list_data = response.data.cookies,
+                    this.total = response.data.total
+                )).catch(function (err) {
+                    console.log(err)
+                })
+            }
+        },
+        isShow() {
+            return this.query_site != ''
+        }
+    }
+
 })
 
 
 var sites = new Vue({
     el: "#site_block",
-    data () {
+    data() {
         return {
             "sites": "",
-            "total": ""
+            "total": "",
+            "current_query_site": ""
         }
     },
-    mounted () {
+    mounted() {
         axios.get('/cookies_all_sites').then(response => (
             this.sites = response.data.sites,
             this.total = response.data.total
-            )).catch(function (err) {
+        )).catch(function (err) {
             console.log(err)
         })
+    },
+    methods: {
+        clickSite(site) {
+            this.current_query_site = site
+        }
     }
 })
+
+
