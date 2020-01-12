@@ -10,9 +10,10 @@
 <script src="./static/vue.js"></script>
 <script src="./static/axios.min.js"></script>
 <!--  -->
+
 <body>
     <div id="site_block">
-            <div v-for='site in sites' :site="site" @click="clickSite(site)">{{ site }} </div>
+        <div v-for='site in sites' :site="site" @click="clickSite(site)">{{ site }} </div>
         <listpage :query_site="current_query_site"></listpage>
     </div>
 </body>

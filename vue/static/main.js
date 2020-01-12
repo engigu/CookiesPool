@@ -1,9 +1,21 @@
 
+function get_site_from_url() {
+    arr = window.location.href.split('#')
+    site = ''
+    if (arr.length === 2) {
+        site = arr.pop()
+    }
+    return site
+}
+
+var default_site = get_site_from_url()
+
 
 Vue.component("listpage", {
     template: `
     <table v-show="isShow">
     listpage
+    {{ query_site }} 站点信息
     {{ query_site }}
     {{ get_cookies }}  <!-- 更改数据 -->
     {{ total }}
@@ -54,7 +66,7 @@ var sites = new Vue({
         return {
             "sites": "",
             "total": "",
-            "current_query_site": ""
+            "current_query_site": default_site
         }
     },
     mounted() {
