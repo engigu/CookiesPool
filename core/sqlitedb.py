@@ -29,10 +29,16 @@ class SQLiteModel:
             )
 
             total = s.execute(
-            query.with_labels().statement.with_only_columns([func.count(1)])
-        ).scalar()
+                query.with_labels().statement.with_only_columns(
+                    [func.count(1)])
+            ).scalar()
             cookies = query.offset(page*(page-1)).limit(size).all()
             return total, cookies
+
+    def get_one_site(self, site):
+        with session_scope() as s:
+            site = s.query(Site).filter(Site.site == site).first()
+            return site
 
     # 添加或者更更新一个site信息
     def add_one_site(self, site_dict):
@@ -75,4 +81,5 @@ class SQLiteModel:
     def delete_one_cookies(self,  cookies_id):
         with session_scope() as s:
             s.query(StoreCookies).filter(
-                StoreCookies.id == cookies_id).delete()
+                StoreCookies.id == cookies_id
+            ).delete()
