@@ -162,6 +162,7 @@ Vue.component("listpage", {
                 if (this.new_created_site_infos.has_editied === true) {
                     formData.append('site', this.site_infos.site);
                     formData.append('check_key', this.site_infos.check_key);
+                    formData.append('check_url', this.site_infos.check_url);
                     formData.append('headers', this.site_infos.headers);
                     formData.append('method', this.site_infos.method);
                 } else {
