@@ -44,8 +44,8 @@ class StoreCookies(Base):
     __tablename__ = "cookies"
     id = Column(Integer, primary_key=True, autoincrement=True)
     site_id = Column(Integer, nullable=False)
-    cookies_name = Column(String(256), server_default=text("''"))
-    cookies = Column(String(64), server_default=text("''"))
+    cookies_name = Column(String(128), server_default=text("''"))
+    cookies = Column(String(4096), server_default=text("''"))
 
     status = Column(Integer, server_default=text("0"))
     created = Column(TIMESTAMP,  server_default=text("CURRENT_TIMESTAMP"))

@@ -72,11 +72,13 @@ def cookies_all():
 def cookies_post():
     site = request.form.get('site', None)
     cookies = request.form.get('cookies', None)
+    cookies_name = request.form.get('cookies_name', None)
     if not all([site,  cookies]):
         return error(msg='site or cookies is empty!')
     cookies_dict = {
         'site': site,
-        'cookies': cookies
+        'cookies': cookies,
+        'cookies_name': cookies_name,
     }
     SQL_MODEL.add_one_cookies(cookies_dict)
     return ok()
@@ -87,10 +89,12 @@ def cookies_post():
 def cookies_put():
     cookies_id = request.form.get('cookies_id', None)
     cookies = request.form.get('cookies', None)
+    cookies_name = request.form.get('cookies_name', None)
     if not all([cookies_id,  cookies]):
         return error(msg='cookies_id or cookies is empty!')
     cookies_dict = {
-        'cookies': cookies
+        'cookies': cookies,
+        'cookies_name': cookies_name
     }
     SQL_MODEL.update_one_cookies(cookies_id, cookies_dict)
     return ok()

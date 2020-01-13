@@ -23,13 +23,22 @@ Vue.component("listpage", {
         <td v-for="col in col_list">{{ col }}</td>
     </tr>
 
+    <tr>
+        <td><input v-model="to_add_cookies_name" placeholder="可留空"></input></td>
+        <td><input v-model="to_add_cookies"></input></td>
+        <td>-</td>
+        <td>-</td>
+        <button @click="addCookies(query_site)">添加</button>
+
+    </tr>
+
     <tr v-for="(item, index) in list_data">
-        <td> {{ item.cookies_name }} </td>
-        <input :value="item.cookies"  v-model="input_cookies"></input>
+        <td><input :value="item.cookies_name"  @input="inputItem('cookies_name', $event.target.value, index)"></input></td>
+        <td><input :value="item.cookies"  @input="inputItem('cookies', $event.target.value, index)"></input></td>
         <td> {{ item.modified }} </td>
         <td v-text="item.status?'不可用':'可用'"></td>
-        <td :key="item.no">修改</td>
-        <td :key="item.no" @click="deleteCookies(item.id, index)">删除</td>
+        <button @click="updateItem(index)">修改</button>
+        <button @click="deleteCookies(item.id, index)">删除</button>
     </tr>
 
 </table>`,
@@ -40,6 +49,8 @@ Vue.component("listpage", {
             "current_editing_cookies": "",
             "col_list": ["Name", "Cookie", "ModifiedAt", "Status"],
             "total": "",
+            "to_add_cookies_name": "",
+            "to_add_cookies": "",
         }
     },
     props: ["query_site"],
@@ -61,12 +72,39 @@ Vue.component("listpage", {
     methods: {
         deleteCookies(cookies_id, index) {
             axios.delete('/cookies?cookies_id=' + cookies_id).then(
-                response => (this.list_data.splice(index, 1))
+                response => (this.list_data.splice(index, 1), alert('删除成功！'))
             ).catch(response => (''))
         },
-        clickToEdite(cookies){
-            this.current_editing_cookies =  cookies
-            console.log(cookies)
+        inputItem(name, input_item, index) {
+            this.$set(this.list_data[index], name, input_item)
+            this.list_data[index].has_editied = true
+            console.log(input_item, index, this.list_data[index].has_editied)
+        },
+        updateItem(index) {
+            if (this.list_data[index].has_editied === true) {
+                var formData = new FormData();
+                formData.append('cookies_id', this.list_data[index].id);
+                formData.append('cookies', this.list_data[index].cookies);
+                formData.append('cookies_name', this.list_data[index].cookies_name);
+                axios.put('/cookies', formData).then(
+                    response => (alert('修改成功！'))
+                ).catch(response => (''))
+            } else {
+                alert('没有改动，不需要更改！')
+            }
+        },
+        addCookies(query_site) {
+            if (!this.to_add_cookies) {
+                alert('cookies为空，请填写再添加！')
+            } else {
+                var formData = new FormData();
+                formData.append('site', query_site);
+                formData.append('cookies', this.to_add_cookies);
+                formData.append('cookies_name', this.to_add_cookies_name);
+                axios.post('/cookies', formData).then(
+                    response => (alert('添加成功！'))
+                ).catch(response => (''))
+            }
         }
     }
 
