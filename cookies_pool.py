@@ -48,7 +48,7 @@ class CookiesPool:
                 check_result = self.do_check(cookies, site)
                 self.deal_check_result(cookies, site, check_result)
             except Exception as e:
-                logging.exception("check error When %s" % key, e)
+                logging.exception("check error When %s" % cookies.id, e)
 
         logging.info(f"current check end")
 
