@@ -29,6 +29,12 @@ class TaskStatus(metaclass=StatusType):
     failed = 1
     unknown = -1
 
+class ReturnStatus(metaclass=StatusType):
+    # API循环返回状态定义
+    not_return = 0
+    has_return = 1
+
+
 
 if __name__ == '__main__':
     print(TaskStatus.keys)

@@ -5,31 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Cookies Page</title>
+    <title>CookiesPage</title>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="./static/vue.js"></script>
+<script src="./static/axios.min.js"></script>
+<!--  -->
 
 <body>
-    <div id="site">
-
-        <table>
-            <tr>
-                <td v-for="col in col_list">{{ col }}</td>
-            </tr>
-
-            <tr v-for="item in list_data">
-                <td> {{ item.key }} </td>
-                <td> {{ item.cookies }} </td>
-                <td> {{ item.modified_at }} </td>
-                <td v-text="item.status?'可用':'不可用'"></td>
-                <td :key="item.no">修改</td>
-                <td :key="item.no">删除</td>
-            </tr>
-
-        </table>
-
+    <div id="site_block">
+        <div v-for='site in sites' :site="site" @click="clickSite(site)">{{ site }} </div>
+        <listpage :query_site="current_query_site"></listpage>
     </div>
 </body>
 <script src="./static/main.js"></script>
+
 </html>

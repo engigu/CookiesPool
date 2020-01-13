@@ -3,6 +3,11 @@ from core.utils import Utils
 
 
 class Config:
+
+    ROOT_PATH =  os.path.dirname(os.path.abspath(__file__))
+
+    SQLITE_URI =  f'sqlite:///{ROOT_PATH}/data/sqlite.db'
+
     PROJECT_NAME = 'cookies_pool'
 
     COOKIES_KEY_FORMAT = '%(site)s:cookies:%(no)s'
