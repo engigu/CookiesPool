@@ -9,16 +9,20 @@ services:
       - RUN_IN_DOCKER=yes
     volumes: 
       - /data/docker/cookies_pools/data:/code/data
+      # - ./:/code
     networks: 
       - cp_net
 
-  # redis:
-  #   image: redis:alpine
-  #   restart: always
-  #   volumes: 
-  #     - /data/cookies_pool:/data
-  #   networks: 
-  #     - cp_net
+  cookies-check-server:
+    build: 
+      context: ./
+      dockerfile: ./docker/check_server.dockerfile
+    image: "cookies-check-server"
+    volumes: 
+      - /data/docker/cookies_pools/data:/code/data
+      - ./:/code
+    networks: 
+      - cp_net
 
   nginx:
     image: nginx:stable-alpine

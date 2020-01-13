@@ -3,7 +3,7 @@ import time
 import tornado.log
 import logging
 
-from core.db import CookiesPoolRedis
+from core.sqlitedb import SQLiteModel
 from checker import Checker
 from config import Config
 from core.utils import Utils
@@ -12,44 +12,45 @@ from core.status import  TaskStatus
 tornado.log.enable_pretty_logging()
 
 
-class RedisPool:
+class CookiesPool:
 
-    def __init__(self, redis_uri):
-        self.redis = CookiesPoolRedis(uri=redis_uri)
+    def __init__(self):
+        self.sqlite = SQLiteModel()
 
-    def do_check(self, cookies_dict):
+    def do_check(self, cookies, site):
         params = {
-            'url': cookies_dict['check_url'],
-            'method': cookies_dict['method'],
-            'headers': cookies_dict['headers'],
-            'cookies': cookies_dict['cookies'],
-            'check_key': cookies_dict['check_key'],
+            'url': site.check_url,
+            'method': site.method,
+            'headers': site.headers,
+            'cookies': cookies.cookies,
+            'check_key': site.check_key,
         }
-
+        print('*****', params)
         ckr = Checker()
         return ckr.do_check(**params)
 
-    def deal_check_result(self, key,cookies_dict, check_result):
-        print('key, check_result::::', key, check_result)
-        if not  check_result:
-            logging.info(f"key: {key} has expired")
-            cookies_dict['modified_at']  =  Utils.now
-            cookies_dict['status']  =  TaskStatus.failed
-            self.redis.update_one_cookies(key, json.dumps(cookies_dict, ensure_ascii=False))
+    def deal_check_result(self, cookies, site, check_result):
+        if not check_result:
+            logging.info(f"cookies_id: {cookies.id} {cookies.cookies_name} has expired")
+            self.sqlite.update_cookeis_status(cookies.id, TaskStatus.failed)
+        else:
+            logging.info(f"cookies_id: {cookies.id} {cookies.cookies_name} is ok!")
+            self.sqlite.update_cookeis_status(cookies.id, TaskStatus.ok)
+       
         return
 
     def do_a_circle(self):
-        for key in self.redis.query_all_cookies_keys():
-            print('keys:', key)
-            # setattr(self, key, False)
-            cookies_dict = self.redis.get_one_cookies(key)
-            print('cookies_dict:', cookies_dict)
+        cookies_and_site = self.sqlite.get_check_cookies()
+        logging.info(f"current query {len(cookies_and_site)} to check")
 
+        for cookies, site in cookies_and_site:
             try:
-                check_result = self.do_check(cookies_dict)
-                self.deal_check_result(key=key, cookies_dict=cookies_dict,check_result=check_result)
+                check_result = self.do_check(cookies, site)
+                self.deal_check_result(cookies, site, check_result)
             except Exception as e:
-                logging.exception("check error When %s" % key, e)
+                logging.exception("check error When %s" % cookies.id, e)
+
+        logging.info(f"current check end")
 
     def run(self):
         while True:
@@ -60,10 +61,9 @@ class RedisPool:
             except Exception as e:
                 logging.exception(e)
             logging.info(f'main loop sleep {Config.SLEEP_LOOP_TIME}s')
-            break
             time.sleep(Config.SLEEP_LOOP_TIME)
 
 
 if __name__ == '__main__':
-    rp = RedisPool(redis_uri=Config.REDIS_URI)
-    rp.run()
+    cp = CookiesPool()
+    cp.run()
