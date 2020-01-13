@@ -7,7 +7,7 @@
 -  如果使用脚本添加`cookies`, 参考`scripts/add_cookies.py`
 
 # api
- - api说明在`/cookies_api`
+ - api说明启动后访问`/cookies_api`
 
 ## 重要！
 -  还是计划使用sqlite作为后端存储

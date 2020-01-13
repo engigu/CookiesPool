@@ -86,7 +86,7 @@ class SQLiteModel:
                 StoreCookies.id == cookies_id
             ).delete()
 
-    def  get_one_cookies(self, site,  strategy='random'):
+    def get_one_cookies(self, site,  strategy='random'):
         # 返回一条cookies
         with session_scope() as s:
             if strategy=='random':
@@ -121,3 +121,25 @@ class SQLiteModel:
                       s.flush()    
             return cookies
 
+    # 以下model主要提供给校验服务使用
+    def get_check_cookies(self):
+        with session_scope() as s:
+            cookies_and_site = s.query(StoreCookies, Site).join(
+                Site,
+                Site.id == StoreCookies.site_id
+            ).filter(
+                # StoreCookies.status == TaskStatus.ok
+            ).all() or []
+
+            return cookies_and_site
+
+    def update_cookeis_status(self, cookies_id, status):
+        with session_scope() as s:
+            s.query(StoreCookies).filter(
+                StoreCookies.id == cookies_id
+            ).update(
+                {
+                    'status': status,
+                    'modified': Utils.now(return_datetime=True)
+                }
+            )

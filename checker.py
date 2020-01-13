@@ -1,4 +1,5 @@
 import requests
+import json
 
 
 class Checker:
@@ -7,11 +8,18 @@ class Checker:
         pass
 
     def do_check(self, url, cookies, check_key, headers=None, method='get'):
-        method = method.lower()
 
+        if isinstance(headers, str):
+            try:
+                headers = json.loads(headers)
+            except:
+                raise Exception('headers format error')
+
+        method = method.lower()
         if method not in ['get', 'post']:
             raise Exception('method error')
-
+        
+        headers['cookie'] = cookies
         # ret_html = getattr(requests, method)()
         # TODO method的完善
         response = requests.get(url=url, headers=headers, timeout=30)

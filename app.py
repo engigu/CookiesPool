@@ -69,7 +69,19 @@ def cookies_this_site_post():
     site = request.form.get('site', None)
     if not site:
         return error(msg='site error')
+
     site_dict = dict(request.form)
+    # method的校验
+    if site_dict['method'].lower() not in ['get', 'post']:
+        return error(msg='method error')
+    
+    # headers的校验
+    try:
+        json.loads(site_dict['headers'])
+    except:
+        return error(msg='headers must be strict json!')
+        
+
     site = SQL_MODEL.add_one_site(site_dict=site_dict)
     return ok()
 
