@@ -1,33 +1,38 @@
 import json
 
 from config import Config
-from core.db import CookiesPoolRedis
+from core.sqlitedb import SQLiteModel
 from core.utils import Utils
 
 
 class AddCookies:
     def __init__(self, redis_uri):
-        self.redis = CookiesPoolRedis(uri=redis_uri)
-
-    # def format_json(self, fa):
+        self.sql = SQLiteModel()
 
     def add_to_redis(self, to_add_cookies: list):
         site = '58'
 
-        for i in to_add_cookies:
-            now = Utils.now()
-            cookies_dict = {
-                'cookies': i,
+        site_dict = {
+                'site': site,
                 'check_url': 'https://employer.58.com/resumesearch?PGTID=0d000000-0000-02bf-9f94-8c7003dc986f&ClickID=29',
                 'check_key': '<title>用户登录-58同城</title>',
                 'method': 'get',
-                'headers': {},
-                'modified_at': now,
-                'created_at': now,
+                'headers': '{}',
+                'status': 0
+            }
+
+        self.sql.add_one_site(site_dict)
+
+        for i in to_add_cookies:
+            now = Utils.now()
+            cookies_dict = {
+                'site': site,
+                'cookies': i,
                 'status': 0
 
             }
-            self.redis.add_one_cookies(site, json.dumps(cookies_dict, ensure_ascii=False))
+            self.sql.add_one_cookies(cookies_dict)
+        #     self.redis.add_one_cookies(site, json.dumps(cookies_dict, ensure_ascii=False))
 
     def test(self):
         # for i in range(1000):
