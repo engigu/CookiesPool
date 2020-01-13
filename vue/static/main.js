@@ -23,19 +23,21 @@ Vue.component("listpage", {
         <td v-for="col in col_list">{{ col }}</td>
     </tr>
 
-    <tr v-for="item in list_data">
+    <tr v-for="(item, index) in list_data">
         <td> {{ item.cookies_name }} </td>
-        <td> {{ item.cookies }} </td>
+        <input :value="item.cookies"  v-model="input_cookies"></input>
         <td> {{ item.modified }} </td>
         <td v-text="item.status?'不可用':'可用'"></td>
         <td :key="item.no">修改</td>
-        <td :key="item.no">删除</td>
+        <td :key="item.no" @click="deleteCookies(item.id, index)">删除</td>
     </tr>
 
 </table>`,
     data() {
         return {
             "list_data": "",
+            "input_cookies": "",
+            "current_editing_cookies": "",
             "col_list": ["Name", "Cookie", "ModifiedAt", "Status"],
             "total": "",
         }
@@ -54,6 +56,17 @@ Vue.component("listpage", {
         },
         isShow() {
             return this.query_site != ''
+        }
+    },
+    methods: {
+        deleteCookies(cookies_id, index) {
+            axios.delete('/cookies?cookies_id=' + cookies_id).then(
+                response => (this.list_data.splice(index, 1))
+            ).catch(response => (''))
+        },
+        clickToEdite(cookies){
+            this.current_editing_cookies =  cookies
+            console.log(cookies)
         }
     }
 

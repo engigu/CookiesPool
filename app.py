@@ -99,7 +99,7 @@ def cookies_put():
 @app.route('/cookies', methods=['DELETE'])
 # @auth.login_required
 def cookies_delete():
-    cookies_id = request.form.get('cookies_id', None)
+    cookies_id = request.args.get('cookies_id', None)
     if not cookies_id:
         return error(msg='cookies_id  is empty!')
     SQL_MODEL.delete_one_cookies(cookies_id=cookies_id)
