@@ -8,6 +8,7 @@ from core.sqlitedb import SQLiteModel
 from core.model import init_sqlite
 from core.utils import Utils
 from config import Config
+from api import API
 
 SQL_MODEL = SQLiteModel()
 app = Flask(__name__)
@@ -37,6 +38,13 @@ def index():
 
 
 # 查询所有的sites
+@app.route('/cookies_api', methods=['GET'])
+# @auth.login_required
+def cookies_api():
+    return jsonify(API)
+
+
+# 查询所有的sites
 @app.route('/cookies_all_sites', methods=['GET'])
 # @auth.login_required
 def cookies_all_sites():
@@ -54,6 +62,18 @@ def cookies_this_site():
     site = SQL_MODEL.get_one_site(site=site)
     return jsonify({"site": Utils.row2dict(site)})
 
+# 查询指定的site
+@app.route('/cookies_this_site', methods=['POST'])
+# @auth.login_required
+def cookies_this_site_post():
+    site = request.form.get('site', None)
+    if not site:
+        return error(msg='site error')
+    site_dict = dict(request.form)
+    site = SQL_MODEL.add_one_site(site_dict=site_dict)
+    return ok()
+
+
 # 查询指定site对应所有的cookies
 @app.route('/cookies_all', methods=['GET'])
 # @auth.login_required
@@ -64,6 +84,22 @@ def cookies_all():
     total, cookies = SQL_MODEL.query_site_cookies(site)
     cookies = [Utils.row2dict(c) for c in cookies]
     return jsonify({"total": total, "cookies": cookies})
+
+# 查询指定的site
+@app.route('/cookies', methods=['GET'])
+# @auth.login_required
+def cookies_get():
+    site = request.args.get('site', None)
+    strategy = request.args.get('strategy', None)
+    if not site:
+        return error(msg='site error')
+    if strategy:
+        if strategy not in ['random', 'order']:
+            return error(msg='strategy error')
+    else:
+        strategy = 'random'
+    cookies = SQL_MODEL.get_one_cookies(site=site, strategy=strategy)
+    return jsonify({"cookies": Utils.row2dict(cookies) if cookies else {}})
 
 
 # 添加一条新的cookies

@@ -16,17 +16,28 @@ Vue.component("listpage", {
 <div id="show_page">
     <table v-show="isShow">
         {{ get_site_info }}   <!-- 更改数据 -->
-        站点信息
+        站点信息 <br/>
+        <p>更新于: {{ site_infos.modified }}</p>
         <tr v-for="(site_value,site_key, index) in site_infos">
-            <td>{{ site_key }}</td>
+            <td v-if="site_key!='modified'">{{ site_key }}</td>
             <td>
-                <input :value="site_value" v-show="site_key!='modified'"></input>
-                <p v-show="site_key==='modified'">{{ site_value }}</p>
+                <input :value="site_value" v-if="site_key!='modified' && site_key!='site'" @input="inputSiteInfo('edited', site_key, $event.target.value)"></input>
+                <p v-if="site_key!='modified' && site_key==='site'">{{ site_value }}</p>
             </td>
             <td>    
-                <button v-if="site_key==='modified'">修改</button>
-                <button v-if="site_key==='modified'">添加</button>
+                <input v-if="site_key!='modified'" @input="inputSiteInfo('created', site_key, $event.target.value)"></input>
             </td>
+        </tr>
+        <tr>
+            <td>    
+               
+            </td>
+        <td>    
+            <button @click="updateSiteInfo('edited')">修改</button>
+        </td>
+        <td>    
+            <button @click="updateSiteInfo('created')">添加</button>
+        </td>
         </tr>
     </table>
 
@@ -72,6 +83,7 @@ Vue.component("listpage", {
             "to_add_cookies_name": "",
             "to_add_cookies": "",
             "site_infos": "",
+            "new_created_site_infos": {},
         }
     },
     props: ["query_site"],
@@ -108,7 +120,7 @@ Vue.component("listpage", {
             axios.delete('/cookies?cookies_id=' + cookies_id).then(
                 response => (
                     this.list_data.splice(index, 1),
-                    alert('删除成功！')
+                    alert(response.data.msg)
                 )
             ).catch(response => (''))
         },
@@ -116,6 +128,17 @@ Vue.component("listpage", {
             this.$set(this.list_data[index], name, input_item)
             this.list_data[index].has_editied = true
             // console.log(input_item, index, this.list_data[index].has_editied)
+        },
+        inputSiteInfo(input_type, name, value) {
+
+            if (input_type === 'edited') {
+                // 如果使用site_infos添加has_editied会实时渲染出这个数据，
+                // 为了不影响就把这个换到了new_created_site_infos， 不是很好的做法， 以后有时间再改
+                this.new_created_site_infos.has_editied = true;
+                this.$set(this.site_infos, name, value);
+            } else {
+                this.$set(this.new_created_site_infos, name, value);
+            }
         },
         updateItem(index) {
             if (this.list_data[index].has_editied === true) {
@@ -125,12 +148,37 @@ Vue.component("listpage", {
                 formData.append('cookies_name', this.list_data[index].cookies_name);
                 axios.put('/cookies', formData).then(
                     response => (
-                        alert('修改成功！')
+                        alert(response.data.msg)
                     )
                 ).catch(response => (''))
             } else {
                 alert('没有改动，不需要更改！')
             }
+        },
+        updateSiteInfo(on_type) {
+            // 修改和新加site公用同一个接口
+            var formData = new FormData();
+            if (on_type === 'edited') {
+                if (this.new_created_site_infos.has_editied === true) {
+                    formData.append('site', this.site_infos.site);
+                    formData.append('check_key', this.site_infos.check_key);
+                    formData.append('headers', this.site_infos.headers);
+                    formData.append('method', this.site_infos.method);
+                } else {
+                    alert('没有改动，不需要更改！')
+                }
+            } else {
+                formData.append('site', this.new_created_site_infos.site);
+                formData.append('check_key', this.new_created_site_infos.check_key);
+                formData.append('headers', this.new_created_site_infos.headers);
+                formData.append('method', this.new_created_site_infos.method);
+            }
+            axios.post('/cookies_this_site', formData).then(
+                response => (
+                    alert(response.data.msg)
+                )
+            ).catch(response => (''))
+
         },
         addCookies(query_site) {
             if (!this.to_add_cookies) {
@@ -142,11 +190,12 @@ Vue.component("listpage", {
                 formData.append('cookies_name', this.to_add_cookies_name);
                 axios.post('/cookies', formData).then(
                     response => (
-                        alert('添加成功！')
+                        alert(response.data.msg)
                     )
                 ).catch(response => (''))
             }
         }
+
     }
 
 })

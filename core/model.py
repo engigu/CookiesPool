@@ -46,7 +46,8 @@ class StoreCookies(Base):
     site_id = Column(Integer, nullable=False)
     cookies_name = Column(String(128), server_default=text("''"))
     cookies = Column(String(4096), server_default=text("''"))
-
+    
+    return_order = Column(Integer, server_default=text("0")) # 维护一个循环返回的顺序
     status = Column(Integer, server_default=text("0"))
     created = Column(TIMESTAMP,  server_default=text("CURRENT_TIMESTAMP"))
     modified = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))

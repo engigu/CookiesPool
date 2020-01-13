@@ -1,8 +1,9 @@
 from sqlalchemy import func
+from  sqlalchemy.sql.expression import func as expression_func
 
 
 from core.model import Site, StoreCookies, session_scope
-from core.status import TaskStatus
+from core.status import TaskStatus, ReturnStatus
 from core.utils import Utils
 from core.exceptions import *
 
@@ -84,3 +85,39 @@ class SQLiteModel:
             s.query(StoreCookies).filter(
                 StoreCookies.id == cookies_id
             ).delete()
+
+    def  get_one_cookies(self, site,  strategy='random'):
+        # 返回一条cookies
+        with session_scope() as s:
+            if strategy=='random':
+                cookies = s.query(StoreCookies).filter(
+                    StoreCookies.status == TaskStatus.ok
+                ).order_by(
+                    expression_func.random()
+                ).limit(1).first()
+            else:
+                cookies_query = s.query(StoreCookies).filter(
+                    StoreCookies.status == TaskStatus.ok,
+                ).order_by(StoreCookies.id.asc())
+                
+                cookies = cookies_query.filter(StoreCookies.return_order == ReturnStatus.not_return).first()
+
+                if not bool(cookies):
+                    # 全部已经返回了一遍
+                    s.query(StoreCookies).filter(
+                        StoreCookies.status == TaskStatus.ok,
+                    ).update(
+                        {'return_order': ReturnStatus.not_return}
+                    )
+                    s.flush()
+                    cookies = cookies_query.filter(StoreCookies.return_order == ReturnStatus.not_return).first()
+                else:
+                    # 有这一轮还未返回过的cookies，返回并更改为返回过
+                      s.query(StoreCookies).filter(
+                          StoreCookies.id == cookies.id
+                      ).update(
+                          {'return_order': ReturnStatus.has_return}
+                      )
+                      s.flush()    
+            return cookies
+
